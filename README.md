@@ -56,6 +56,46 @@ project-locally if you prefer:
 cp skills/onesearch/SKILL.md .claude/skills/onesearch/SKILL.md
 ```
 
+## With OneSearch vs without: half the cost, better answer
+
+Same repo (VS Code), same model, same question —
+*"how is auto-completion coded?"*
+
+One agent used `os` + the skill. The other used only `bash` / `grep` / `sed`.
+
+| | With OneSearch + skill | Grep / sed only |
+|---|---:|---:|
+| Model turns | **15** | 20 |
+| Tool calls | **23** | 33 |
+| Shell grabs (`grep`, `sed`, `find`) | **10** | 30 |
+| Input tokens billed | **~285k** | ~569k |
+
+**Same correct answer for ~50% of the tokens.**
+
+And not just cheaper — clearer. Both named the right files with
+`file:line` refs. Only the OneSearch answer led with the *why*:
+
+```
+provider → registry → SuggestModel → provideSuggestionItems
+  → CompletionModel → widget → controller → insert
+```
+
+contract → scored registry → trigger state machine → fan-out gather
+→ fuzzy rank → render → insert — plus the two design decisions that
+explain the code: **first non-empty provider group wins**, and
+**incremental refilter** instead of re-scoring everything per keystroke.
+
+Why it happens: the skill asks twice — definition + behavior in one
+`batch` pass — then reads only the hit ranges. Without it the agent
+walks the tree and pastes whole files, paying for every line on every
+later turn.
+
+```sh
+printf '%s\n' \
+  "where is the completion provider interface declared and registered" \
+  "what happens when a completion is triggered" | os batch
+```
+
 ## Uninstall
 
 ```sh

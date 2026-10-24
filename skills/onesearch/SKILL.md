@@ -60,7 +60,7 @@ Omit it unless the question is not about source code. The default is `code`.
 | `code` | repository source files | **the default**; every question about behavior |
 | `docs` | documentation, prose, notes | "where is this documented", design rationale |
 | `config` | build, package and data files | settings, manifests, CI |
-| `session` | OneLoop conversation logs | only when the user asks about past sessions |
+| `session` | OneLoop conversation logs: prose, tool calls and tool results | only when the user asks about past sessions |
 | `all` | everything | rarely; docs and logs then rank against the code |
 
 Documentation and configuration repeat a question's vocabulary and win on words
@@ -112,8 +112,12 @@ os --repo-dir ~/other/checkout --session-dir ~/logs search "retry logic"
 
 `-k` caps output (10 for `search`, 5 for `related`), and each hit is one line of
 index plus its code, so `-k 20` is a lot of lines: pipe through `head` only
-knowingly.
+knowingly. Results keep one hit per file, except session logs, where each hit is
+a different turn of the same day.
 
 `index` builds or refreshes the snapshot and prints its size; `clear` deletes
-it (safe — the next search rebuilds). Session results can contain private
+it (safe — the next search rebuilds). A `session` hit can be a tool call or a
+tool result as well as prose — `ToolCall: bash cargo test ...` answers "what was
+run", `ToolResult: bash ...` carries the head and tail of the output, so an
+error's verdict is at the end of the chunk. Session results can contain private
 conversation text — review before sharing.

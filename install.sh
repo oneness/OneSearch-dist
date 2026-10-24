@@ -7,13 +7,13 @@
 #   curl -fsSL https://raw.githubusercontent.com/oneness/OneSearch-dist/main/install.sh | bash
 #
 # Pinned to a release:
-#   curl -fsSL https://raw.githubusercontent.com/oneness/OneSearch-dist/main/install.sh | ONESEARCH_VERSION=v0.1.0 bash
+#   curl -fsSL https://raw.githubusercontent.com/oneness/OneSearch-dist/main/install.sh | ONESEARCH_VERSION=v0.1.1 bash
 #
 # Inspect before running (recommended for the security-conscious):
 #   curl -fsSLO https://raw.githubusercontent.com/oneness/OneSearch-dist/main/install.sh && less install.sh
 #
 # Environment overrides:
-#   ONESEARCH_VERSION    release tag, e.g. v0.1.0 (default: latest release)
+#   ONESEARCH_VERSION    release tag, e.g. v0.1.1 (default: latest release)
 #   ONESEARCH_BIN_DIR    install dir for `onesearch`/`os` (default: ~/.local/bin)
 #   ONESEARCH_NO_SKILL=1 skip the SKILL.md install
 #   ONESEARCH_SKILL_DIR  install the skill only here (default: auto-detect)

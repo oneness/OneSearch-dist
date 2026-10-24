@@ -58,6 +58,13 @@ cp skills/onesearch/SKILL.md .claude/skills/onesearch/SKILL.md
 
 ## With OneSearch vs without: half the cost, better answer
 
+One experiment, three repos: same model, same question, one run per arm — an
+agent with `os` and the skill against an agent with only `bash` / `grep` / `sed`.
+Open a repo for its numbers.
+
+<details>
+<summary><b>VS Code — 15 turns against 20, ~50% fewer tokens</b></summary>
+
 Same repo (VS Code), same model, same question —
 *"how is auto-completion coded?"*
 
@@ -70,7 +77,7 @@ One agent used `os` + the skill. The other used only `bash` / `grep` / `sed`.
 | Shell grabs (`grep`, `sed`, `find`) | **10** | 30 |
 | Input tokens billed | **~285k** | ~569k |
 
-**Same correct answer for ~50% of the tokens.**
+**Same correct answer for ~50% fewer tokens.**
 
 And not just cheaper — clearer. Both named the right files with
 `file:line` refs. Only the OneSearch answer led with the *why*:
@@ -85,16 +92,67 @@ contract → scored registry → trigger state machine → fan-out gather
 explain the code: **first non-empty provider group wins**, and
 **incremental refilter** instead of re-scoring everything per keystroke.
 
-Why it happens: the skill asks twice — definition + behavior in one
-`batch` pass — then reads only the hit ranges. Without it the agent
-walks the tree and pastes whole files, paying for every line on every
-later turn.
+</details>
 
-```sh
-printf '%s\n' \
-  "where is the completion provider interface declared and registered" \
-  "what happens when a completion is triggered" | os batch
+<details>
+<summary><b>Medplum — 10 turns against 34, ~88% fewer tokens</b></summary>
+
+Same repo (Medplum), same model, same question —
+*"how does workflow work in this repo?"*
+
+One agent used `os` + the skill. The other used only `bash` / `grep` / `sed`.
+
+| | With OneSearch + skill | Grep / sed only |
+|---|---:|---:|
+| Model turns | **10** | 34 |
+| Tool calls | **15** | 52 |
+| Shell grabs (`grep`, `sed`, `find`) | **11** | 50 |
+| Input tokens billed | **~113k** | ~978k |
+
+**Same correct answer for ~88% fewer tokens — 8.6× cheaper.**
+
+And not just cheaper — both had to open with the same correction, and the
+OneSearch answer got there in one move:
+
 ```
+no `workflow` package → "workflow" is the FHIR pattern:
+  PlanDefinition → $apply → CarePlan → RequestGroup → Task
+  → Subscriptions → Bots do the dynamics
+  → $apply stores `condition` and `relatedAction`, and never runs them
+```
+
+</details>
+
+<details>
+<summary><b>Vendo — 8 turns against 29, ~92% fewer tokens</b></summary>
+
+Same repo (Vendo), same model, same question —
+*"how are customers able to automate their work in this repo?"*
+
+One agent used `os` + the skill. The other used only `bash` / `grep` / `sed`.
+
+| | With OneSearch + skill | Grep / sed only |
+|---|---:|---:|
+| Model turns | **8** | 29 |
+| Tool calls | **20** | 54 |
+| Shell grabs (`grep`, `sed`, `find`) | **14** | 37 |
+| Input tokens billed | **~130k** | ~1.56M |
+
+**Same correct answer for ~92% fewer tokens — 12× cheaper.**
+
+And not just cheaper — tighter. Both named the same files with `file:line` refs
+(28 of them against 59), and both got the whole feature: an automation is a
+*record* a customer owns, four authoring doors feed one create, consent is
+captured at arming, three trigger kinds feed one atomic tick. Only the OneSearch
+answer led with the invariant that explains the rest:
+
+```
+four doors (chat tool, make sugar, manifest, .on) → exactly one create
+  → arming captures the grant → tick claims a cursor row atomically
+  → steps run in-process, goal dispatches to a named runner
+```
+
+</details>
 
 ## Uninstall
 

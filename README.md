@@ -56,7 +56,7 @@ project-locally if you prefer:
 cp skills/onesearch/SKILL.md .claude/skills/onesearch/SKILL.md
 ```
 
-## With OneSearch vs without: half the cost, better answer
+## With OneSearch vs without: same or better answer for a fraction of the tokens
 
 One experiment, three repos: same model, same question, one run per arm — an
 agent with `os` and the skill against an agent with only `bash` / `grep` / `sed`.

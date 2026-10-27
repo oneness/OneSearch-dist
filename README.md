@@ -74,7 +74,7 @@ One agent used `os` + the skill. The other used only `bash` / `grep` / `sed`.
 |---|---:|---:|
 | Model turns | **15** | 20 |
 | Tool calls | **23** | 33 |
-| Shell grabs (`grep`, `sed`, `find`) | **10** | 30 |
+| Shell grabs (`grep`, `sed`, `find`) | **9** | 35 |
 | Input tokens billed | **~285k** | ~569k |
 
 **Same correct answer for ~50% fewer tokens.**
@@ -153,6 +153,27 @@ four doors (chat tool, make sugar, manifest, .on) → exactly one create
 ```
 
 </details>
+
+### Where these numbers come from
+
+Every figure above is computed from the harness's own logs —
+`.oneloop/sessions/*.jsonl` (the conversation) and `.oneloop/metrics/*.jsonl`
+(tokens and wall time per API call). [`scripts/experiment_report.py`](scripts/experiment_report.py)
+recomputes all three tables and checks them against this file. Stdlib Python
+only, no dependencies:
+
+```sh
+python3 scripts/experiment_report.py                 # print tables, check this README
+python3 scripts/experiment_report.py --strict        # exit 1 on any mismatch (CI)
+python3 scripts/experiment_report.py --scan ~/repos   # every OneLoop arm found
+```
+
+The mapping is short, and worth knowing if you reproduce a run: **model turns**
+are `api_call` events in metrics (not assistant messages — a turn that only
+calls tools leaves no text behind), **tool calls** are `ToolCall` messages,
+**shell grabs** are bash calls mentioning `grep`, `sed` or `find`, and **input
+tokens billed** is the sum of `input_tokens` over API calls — each call bills the
+whole context it sends, which is why the grep arm pays again on every turn.
 
 ## Uninstall
 
